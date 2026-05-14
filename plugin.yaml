@@ -1,0 +1,22 @@
+name: llm_wiki
+title: LLM Wiki — Karpathy-style Multi-Wiki Knowledge Base
+description: >
+  A persistent, self-maintaining knowledge base built from markdown files.
+  Inspired by Andrej Karpathy's LLM Wiki pattern — agents compile raw sources
+  into structured, interlinked wikis instead of re-deriving knowledge via RAG
+  on every query. Supports multiple named wikis in a single SharedBrain vault
+  with per-agent access control, cross-wiki queries, external local vault
+  discovery, and Obsidian compatibility. Multi-wiki mode is on by default;
+  the vault is auto-detected relative to the project. Ships a git
+  auto-commit trail, coverage tags on ingested pages, a WebUI dashboard
+  at /plugins/llm_wiki/webui/main.html, automatic system-prompt injection
+  of the vault summary, and a smoke-test script (execute.py) you can run
+  from the Plugin List UI. Tools: wiki_ingest, wiki_query, wiki_lint,
+  wiki_list, wiki_register, wiki_commit.
+version: "2.2.0"
+author: "frantz"
+settings_sections:
+  - agent
+per_project_config: true
+per_agent_config: false
+always_enabled: true

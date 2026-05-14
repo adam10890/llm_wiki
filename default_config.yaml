@@ -1,0 +1,102 @@
+# LLM Wiki — default configuration
+#
+# These values are overridden per-project via:
+#   .a0proj/plugins/llm_wiki/config.json
+# or edited here directly for an installation-wide setting.
+#
+# Two operating modes are supported:
+#
+#   1. SharedBrain multi-wiki mode (DEFAULT since v2.1)
+#      - Set shared_vault.path to the absolute path of your SharedBrain vault.
+#      - The vault must contain registry.yaml describing named wikis, grants,
+#        and query behavior.
+#      - Tools are then registry-aware and access-controlled.
+#
+#   2. Legacy single-wiki mode
+#      - Set shared_vault.enabled: false
+#      - Uses the active project's directory as the wiki root
+#      - Expects <project>/wiki_raw/ and <project>/wiki/
+#      - No access control, no multi-wiki
+
+# --------------------------------------------------------------------------
+# SharedBrain — multi-wiki mode (default)
+# --------------------------------------------------------------------------
+shared_vault:
+  # Multi-wiki mode is ON by default. Flip to false to use legacy per-project mode.
+  enabled: true
+  # Absolute path to the SharedBrain vault (the folder containing registry.yaml).
+  # Leave empty to auto-detect: the plugin will look for registry.yaml in the
+  # active project root, then in the parent directory of the Agent Zero install
+  # (useful when SharedBrain/ lives alongside usr/).
+  # In this install the vault is bind-mounted at /data/SharedBrain
+  # (post-2026-04-28; previously /a0/SharedBrain — moved out of /a0/ so
+  # A0's self-update flow cannot reach it). See AGENTS.md "SharedBrain
+  # location" and docker-compose.yml. The per-project config.json pins
+  # path explicitly to /data/SharedBrain; this file's empty default lets
+  # auto-detect still work for fresh installs.
+  path: ""
+
+# --------------------------------------------------------------------------
+# Agent identity (for access control)
+# --------------------------------------------------------------------------
+# If set, overrides automatic agent-id detection. Must match a key in
+# registry.yaml → grants (e.g. "agent_zero", "claude_code", "openclaw").
+agent_id: "agent_zero"
+
+# --------------------------------------------------------------------------
+# Git auto-commit
+# --------------------------------------------------------------------------
+# When enabled, each wiki operation that writes files records a commit in the
+# vault's git repo. Provides a full audit trail: who changed what, when, why.
+#
+# Prerequisite: run `git init` inside the vault root once.
+# Safe by default: silent no-op if git is not installed or the vault is not a
+# git repo. Never pushes; only local commits.
+git:
+  auto_commit: true
+  # Prefix every commit message with this label so wiki commits are easy to filter.
+  commit_prefix: "[llm_wiki]"
+  # Agent identity used in `git config user.name` for these commits.
+  # Falls back to the resolved agent_id if empty.
+  committer_name: ""
+  # Email used for `git config user.email`. Non-routable by default.
+  committer_email: "llm-wiki@sharedbrain.local"
+
+# --------------------------------------------------------------------------
+# Legacy single-wiki knobs (used when shared_vault is disabled)
+# --------------------------------------------------------------------------
+wiki:
+  raw_dir: "wiki_raw"
+  wiki_dir: "wiki"
+  index_file: "index.md"
+  log_file: "log.md"
+
+lint:
+  # Auto-lint after N ingest operations (0 = disabled)
+  auto_lint_after_n_ingests: 5
+  # Max pages to check per lint pass (0 = all)
+  max_pages_per_lint: 30
+
+query:
+  # Max wiki pages to load into context per query (single-wiki mode)
+  max_context_pages: 15
+  # Whether to auto-save valuable query answers back into the wiki
+  auto_save_answers: false
+
+# --------------------------------------------------------------------------
+# Coverage indicators (new in v2.1)
+# --------------------------------------------------------------------------
+# When true, wiki_ingest asks the agent to annotate each section of new pages
+# with a coverage tag: "high" (well-sourced), "medium" (partial), "low" (stub).
+# Downstream tools (wiki_query, external readers) can use these as trust
+# signals to decide when to fall back to raw sources.
+coverage:
+  enabled: true
+  tags: [high, medium, low]
+
+graphify:
+  # Directory where graphify outputs live (relative to each wiki root)
+  output_dir: "graphify-out"
+  max_god_nodes: 10
+  max_related_edges: 15
+  report_max_chars: 3000

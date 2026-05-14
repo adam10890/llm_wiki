@@ -1,0 +1,29 @@
+{
+  "shared_vault": {
+    "enabled": true,
+    "path": "/data/SharedBrain"
+  },
+  "agent_id": "agent_zero",
+  "git": {
+    "auto_commit": true,
+    "commit_prefix": "[llm_wiki]",
+    "committer_name": "agent_zero",
+    "committer_email": "llm-wiki@sharedbrain.local"
+  },
+  "coverage": {
+    "enabled": true,
+    "tags": [
+      "high",
+      "medium",
+      "low"
+    ]
+  },
+  "lint": {
+    "auto_lint_after_n_ingests": 5,
+    "max_pages_per_lint": 30
+  },
+  "query": {
+    "max_context_pages": 15,
+    "auto_save_answers": false
+  }
+}
