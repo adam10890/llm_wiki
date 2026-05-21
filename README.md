@@ -48,6 +48,7 @@ A ready-to-use template ships alongside this plugin at `SharedBrain/` (top of th
 - `wikis/agent_self/` — Agent Zero's private self-model
 - `wikis/about_user/` — what we know about the user
 - `wikis/general/` — topic-agnostic reference material
+- `wikis/onboarding/` — first-instructions wiki (see [Agent Onboarding](#agent-onboarding) below)
 - `agents/` — per-agent entry points (`CLAUDE.md`, `SKILL.md`, `AGENTS.md`, `openclaw.md`, `hermes.md`)
 - `registry.yaml` — canonical wiki registry
 - `README.md`, `SETUP.md`, `ROADMAP.md`
@@ -98,6 +99,60 @@ wiki_register name=project_foo scope=project title="Project Foo"
 wiki_commit wiki=commons op=INGEST message="attention.pdf"
 ```
 
+## Agent Onboarding
+
+A companion scaffold under `wikis/onboarding/` ships with the repo as the
+**first page an agent should read** when it needs to use the SharedBrain.
+It mirrors the `_start_here.md` + `_index.md` pattern in the sibling
+[`a0_pen_paper`](https://github.com/adam10890/a0_pen_paper) plugin so the
+two systems are discoverable in the same shape:
+
+```
+wikis/onboarding/wiki/
+  index.md         # catalog — "which page should I open next?"
+  _start_here.md   # 5 core rules + bridge back to Pen & Paper
+  log.md           # append-only audit trail
+```
+
+The scaffold also documents the **division of labour** that the two plugins
+share:
+
+| | Pen & Paper | LLM Wiki |
+|---|---|---|
+| Role | Working memory, current session | Long-term memory, cross-session |
+| Typical page length | 200-300 lines (warning 250, split 300) | ≤400 target, **500 hard cap** |
+| Lifecycle | Archive after session, delete after 90 days | Indefinite + git history |
+| When to read | Mid-session, same task | Start of a similar task in the future |
+
+To enable the `onboarding` wiki in a real vault, add an entry to
+`registry.yaml`:
+
+```yaml
+wikis:
+  - name: onboarding
+    title: "Agent Onboarding"
+    path: "./wikis/onboarding"
+    scope: reference
+    description: "First-instructions wiki: read me before using any other wiki."
+    tags: [meta, onboarding]
+    sensitivity: internal
+    default_for_ingest: false
+```
+
+And grant every agent read access (write only for admins):
+
+```yaml
+grants:
+  agent_zero:
+    read:  ["*"]
+  claude_code:
+    read:  ["*"]
+  # ... etc
+```
+
+Hard ceiling for every page in this vault: **500 lines**. Above that, split
+into linked pages with a parent MOC.
+
 ## Tools
 
 | Tool | Purpose | Multi-wiki argument |
@@ -119,6 +174,8 @@ All original v1/v2 arguments still work; v2.1 additions are purely additive.
 | `default_config.yaml` | Admin | Runtime settings (vault path, agent id, git, coverage) |
 | `skills/SKILL.md` | Agent (system prompt) | Architecture, workflow, conventions |
 | `prompts/agent.system.tool.*.md` | Agent (per-tool) | Exact JSON schema + when-to-use for each tool |
+| `wikis/onboarding/wiki/_start_here.md` | Agent (runtime) | First page an agent reads before any wiki op |
+| `wikis/onboarding/wiki/index.md` | Agent (runtime) | Catalog of onboarding pages |
 | `execute.py` | Admin / CI | Smoke-test script; verifies vault discovery + grants |
 | `config.json` (per-project) | Admin | Project-specific overrides of defaults |
 | `registry.yaml` | SharedBrain runtime | Canonical wiki list + agent grants (human-curated) |
@@ -161,6 +218,7 @@ That `agent_id` must match the `grants.agent_zero` block in
 │   ├── about_user/
 │   ├── agent_self/
 │   ├── general/
+│   ├── onboarding/
 │   └── slr_project/
 ├── registry.yaml
 └── .git
