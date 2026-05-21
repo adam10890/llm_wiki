@@ -202,6 +202,17 @@ class WikiQuery(WikiToolBase):
             result_parts.insert(5, f"**Total pages loaded:** {total_pages_loaded}")
             result_parts.insert(6, "")
 
+            # Conservative token estimate: Hebrew/mixed content ≈ 3 chars/token.
+            # Appended as an HTML comment so the router can parse it without
+            # the LLM tripping over it.
+            full_text = "\n".join(result_parts)
+            token_est = max(1, len(full_text) // 3)
+            result_parts.append(
+                f"<!-- token_estimate: {token_est} "
+                f"pages_loaded: {total_pages_loaded} "
+                f"wikis_queried: {len(selected)} -->"
+            )
+
             return Response(message="\n".join(result_parts), break_loop=False)
 
         # ---------------- legacy single-wiki mode ----------------
@@ -260,6 +271,14 @@ class WikiQuery(WikiToolBase):
                 "2. Update index.md",
                 f"3. Append to log.md: `## [{timestamp}] [QUERY] {question[:80]}`",
             ])
+
+        full_text = "\n".join(result_parts)
+        token_est = max(1, len(full_text) // 3)
+        result_parts.append(
+            f"<!-- token_estimate: {token_est} "
+            f"pages_loaded: {len(pages)} "
+            f"wikis_queried: 1 -->"
+        )
 
         return Response(message="\n".join(result_parts), break_loop=False)
 
