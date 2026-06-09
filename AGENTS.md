@@ -1,102 +1,56 @@
-# AGENTS.md — llm_wiki
+# DOX contract — llm_wiki
 
-**Version:** 2.2.0 | **Target:** Agent Zero v1.15–v1.17
+## Purpose
 
-## What this plugin does
+Agent Zero plugin for SharedBrain: a multi-wiki knowledge base with registry
+grants, sensitivity labels, cross-wiki queries, ingest/lint/register/commit
+tools, and a companion Claude Code plugin.
 
-Multi-wiki knowledge base implementing Karpathy's LLM Wiki pattern. Agents compile raw sources into structured markdown collections (wikis) stored in a shared vault (`SharedBrain`). Multiple agents share one vault via a registry with per-agent access control.
+## Ownership
 
-## Key files
+- This plugin is the maintained SharedBrain implementation for Agent Zero.
+- The canonical permission source is SharedBrain `registry.yaml`.
+- Tools enforce grants before reads/writes. Do not bypass registry checks.
+- Keep A0 plugin behavior and Claude Code companion behavior aligned when a
+  command contract changes.
 
-| Path | Role |
-|---|---|
-| `plugin.yaml` | Manifest — `always_enabled: true`, section: `agent` |
-| `tools/wiki_ingest.py` | Compile a raw source into a wiki page |
-| `tools/wiki_query.py` | Search across wikis, synthesize answer |
-| `tools/wiki_lint.py` | Health-check a wiki (broken links, oversized pages) |
-| `tools/wiki_list.py` | List wikis + grants + stats |
-| `tools/wiki_register.py` | Add a new wiki to the registry |
-| `tools/wiki_commit.py` | Stage + commit pending vault changes in git |
-| `tools/wiki_registry.py` | `WikiRegistry` class — reads/writes `registry.yaml` |
-| `tools/_base.py` | `WikiToolBase(Tool)` — shared config/identity/path helpers |
-| `helpers/` | Vault discovery, git operations, coverage tagging |
-| `extensions/` | System-prompt injection of vault summary |
-| `initialize.py` | Plugin startup — vault discovery + sanity check |
-| `execute.py` | Smoke-test script (run from Plugin List UI or CLI) |
-| `default_config.yaml` | Runtime defaults (vault path, agent_id, git, coverage) |
+## Local Contracts
 
-## Vault layout
+- `tools/wiki_registry.py` is the registry and grants contract.
+- `tools/wiki_ingest.py`, `wiki_query.py`, `wiki_lint.py`, `wiki_list.py`,
+  `wiki_register.py`, and `wiki_commit.py` are the six core operations.
+- Prompt files in `prompts/` must stay aligned with tool names and behavior.
+- `shared_vault.enabled: true` multi-wiki mode and legacy single-wiki mode must
+  both keep working unless the user explicitly accepts a migration.
+- `wiki_register` may create wiki structure and append registry entries, but
+  must not auto-grant access.
 
-```
-SharedBrain/
-├── registry.yaml        # canonical wiki list + agent grants
-├── wikis/
-│   ├── commons/         # shared multi-agent brain
-│   ├── agent_self/      # agent's private self-model
-│   ├── about_user/      # knowledge about the user
-│   ├── general/         # topic-agnostic reference
-│   └── onboarding/      # first-instructions wiki
-└── .git                 # optional — enables auto-commit
-```
+## Work Guidance
 
-## Registry schema (essentials)
+- Read the parent Agent Zero workspace contract before wiki work when this
+  plugin is installed in a live Agent Zero tree.
+- For SharedBrain vault edits, follow the vault's own agents protocol rather
+  than this plugin contract.
+- For plugin code edits, preserve dual-mode behavior and access checks.
+- If adding portable access for Hermes/OC/meta, prefer a small MCP/HTTP door in
+  front of existing registry logic rather than a new parallel policy store.
 
-```yaml
-wikis:
-  - name: commons
-    path: "./wikis/commons"    # relative to vault root, or absolute
-    scope: shared              # shared|self|personal|project|reference|external
-    sensitivity: internal      # public|internal|private|secret
-    default_for_ingest: true
+## Verification
 
-grants:
-  agent_zero:
-    read:  ["*"]
-    write: [commons, agent_self, about_user, general]
-```
+- Compile touched Python files.
+- Run plugin tests when modifying argument parsing, registry behavior, or
+  prompt/tool contracts.
+- Smoke-test with `execute.py` when vault discovery or grants behavior changes.
 
-## Tool reference
+## Child DOX Index
 
-| Tool | Required args | Notes |
-|---|---|---|
-| `wiki_list` | — | Returns all wikis + grants |
-| `wiki_ingest` | `source_path`, `wiki` | `wiki` defaults to registry's `default_for_ingest` |
-| `wiki_query` | `question` | `wikis` defaults to all readable |
-| `wiki_lint` | `wiki` | `fix=true` to auto-fix |
-| `wiki_register` | `name`, `scope` | Creates skeleton; does NOT touch `grants` |
-| `wiki_commit` | `wiki`, `op`, `message` | Commits pending write-tool output |
-
-## Page conventions
-
-- Hard cap: **500 lines per page**. Above that, split with a parent MOC.
-- Coverage tags on substantive sections: `<!-- coverage: high|medium|low -->`
-- Namespaced backlinks: `other_wiki::[[page]]`
-
-## Access control enforcement
-
-On every write tool call:
-1. Read `registry.yaml` → get grants for current `agent_id`.
-2. Reject if the target wiki is not in `write` grants.
-3. `wiki_register` never modifies `grants` — always a human decision.
-
-## How to add a new tool
-
-1. Create `tools/wiki_<name>.py` with a class inheriting `WikiToolBase`.
-2. A0 auto-discovers all files in `tools/`.
-3. Add tool description to `prompts/agent.system.tool.<name>.md`.
-
-## Configuration
-
-`default_config.yaml` keys:
-- `shared_vault.path` — absolute path to SharedBrain (empty = auto-detect)
-- `agent_id` — must match a `grants` key in `registry.yaml`
-- `git.auto_commit` — boolean
-- `coverage.enabled` — boolean
-
-`per_project_config: true` — override per project via `.a0proj/plugins/llm_wiki/config.json`.
-
-## Integration with a0_pen_paper
-
-Division of labour:
-- `a0_pen_paper` = working memory (current session, 200–300 line pages)
-- `llm_wiki` = long-term memory (cross-session, 500-line hard cap)
+- `tools/AGENTS.md` — registry, ingest, query, lint, list, register, and commit
+  tool contracts.
+- `helpers/AGENTS.md` — shared helper code for web/API/plugin support.
+- `api/AGENTS.md` — web/API wrappers for wiki operations.
+- `extensions/AGENTS.md` — Agent Zero prompt/context hooks.
+- `prompts/AGENTS.md` — tool prompt guidance.
+- `skills/AGENTS.md` — natural-language SharedBrain skill guidance.
+- `tests/AGENTS.md` — registry/tool behavior tests.
+- `webui/AGENTS.md` — plugin UI.
+- `docs/AGENTS.md` — SharedBrain/plugin documentation.
