@@ -189,6 +189,28 @@ class LLMWikiContext(Extension):
         )
         lines.append("")
 
+        lines.extend([
+            "### Required: wiki before every other search",
+            "Before EVERY non-wiki search (web, repository, filesystem, connector, "
+            "database or another memory store), refresh task-relevant context from "
+            "SharedBrain and read the returned pages before proceeding. Do not run "
+            "the wiki lookup and the other search in parallel. This applies even "
+            "when the user never mentions the wiki, and to delegated tasks too.",
+            "Read permitted onboarding instructions, then query the relevant "
+            "readable wikis. The cached catalog above is NOT a completed lookup. "
+            "Use a fresh lookup before each subsequent non-wiki search; do not "
+            "reuse an earlier task's answer. Wiki discovery and wiki retrieval "
+            "themselves do not recursively require another lookup.",
+            "Record consulted pages, retrieval time, coverage and remaining gaps "
+            "in task-local context. Search elsewhere only for gaps or required "
+            "freshness/source verification. A bounded query is not proof that "
+            "the entire wiki lacks an answer. Keep private content out of external queries.",
+            "If the wiki is unavailable or access is denied, report the blocker "
+            "and pause other searches; never claim the refresh succeeded or "
+            "bypass grants. Only an explicit user exception permits proceeding.",
+            "",
+        ])
+
         if is_librarian:
             lines.extend(self._librarian_tool_reference())
         else:
@@ -245,12 +267,13 @@ class LLMWikiContext(Extension):
         return [
             "### Wiki Delegation Policy",
             "",
-            "When the user asks a **knowledge question**, a **wiki search**, an "
+            "Before every non-wiki search, or when the user asks a **knowledge question**, a **wiki search**, an "
             "**ingestion**, or any other wiki-related task \u2014 do NOT call the "
             "`wiki_*` tools yourself. Instead, **delegate to the dedicated "
             "`wiki_librarian` sub-agent** via `call_subordinate`. The librarian:",
             "",
-            "- has full read/write grants on every wiki (no permission friction),",
+            "- must honor registry grants and the requesting agent's permitted scope; "
+            "delegation never grants extra access,",
             "- preserves your context window by doing the wiki lookup in its own session,",
             "- enforces citation discipline (`commons::[[page]]` namespaced backlinks),",
             "- returns a structured `Answer / Citations / Coverage / Suggested Ingestion` payload.",
@@ -276,7 +299,9 @@ class LLMWikiContext(Extension):
             "",
             "**Set `reset: true` on the FIRST librarian call** of each task; use "
             "`reset: false` for follow-ups in the same task. Pass the question in "
-            "the user's original language (typically Hebrew or English).",
+            "the user's original language (typically Hebrew or English), together "
+            "with your agent id and permitted wiki scope. Request fresh reads, "
+            "citations, retrieval time and gaps; wait for the result before any other search.",
             "",
             "**Direct `wiki_*` tool calls are reserved for the librarian profile.** "
             "If you absolutely must run one yourself (e.g. quick `wiki_list` for "

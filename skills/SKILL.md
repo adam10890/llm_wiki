@@ -7,7 +7,9 @@ description: >
   wiki, or asks to organize information into a structured interlinked
   collection. Also trigger when the user drops files into any `wiki_raw/` under
   the SharedBrain vault, or asks questions that could be answered from any
-  wiki in the registry you have read access to.
+  wiki in the registry you have read access to. For agents connected to
+  SharedBrain, also trigger before EVERY search outside the wiki, even when
+  the user does not mention it.
 version: "1.0.0"
 author: "Adam Frantz"
 license: "MIT"
@@ -25,6 +27,19 @@ triggers:
 # LLM Wiki — Karpathy-style Knowledge Base
 
 ## Overview
+
+**Required search order:** Before every non-wiki search (web, repository,
+filesystem, database, connector or other memory), refresh task-relevant wiki
+context and read the result. Follow the permitted vault onboarding protocol at
+`wikis/onboarding/wiki/_start_here.md`; use `wiki_query` or the harness's
+required librarian delegation. Wait for completion before searching elsewhere.
+The cached wiki catalog and previous answers do not satisfy this requirement.
+Keep consulted pages, retrieval time, coverage and gaps in task-local context.
+Outside searches fill gaps or verify freshness. Repeat before each other search;
+wiki discovery/retrieval does not recursively trigger this rule. On unavailable
+or denied wiki access, report the blocker and pause other searches unless the
+user explicitly permits an exception. Respect caller grants during delegation
+and keep private wiki content out of external queries.
 
 This plugin implements Andrej Karpathy's LLM Knowledge Base pattern.
 Instead of re-deriving knowledge via RAG on every query, the LLM

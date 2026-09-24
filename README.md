@@ -101,6 +101,14 @@ wiki_commit wiki=commons op=INGEST message="attention.pdf"
 
 ## Agent Onboarding
 
+**Wiki before every other search:** every connected agent must retrieve and
+read fresh, task-relevant wiki context before each non-wiki search, including
+web, repository, filesystem and connector searches. A cached catalog is not a
+lookup. The Agent Zero prompt hook and skill carry this instruction; other
+harnesses must load the same policy in their active instructions. See
+[rollout and verification](docs/WIKI_FIRST.md). This is an instruction policy,
+not a runtime interceptor for other harnesses' tools.
+
 A companion scaffold under `wikis/onboarding/` ships with the repo as the
 **first page an agent should read** when it needs to use the SharedBrain.
 It mirrors the `_start_here.md` + `_index.md` pattern in the sibling
