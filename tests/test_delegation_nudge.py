@@ -171,6 +171,20 @@ def main() -> int:
                            "`commons`"):
         failures += 1
 
+    # Both routes must receive the pre-search rule, not only the librarian.
+    for label, block in (("librarian", block_lib), ("developer", block_dev)):
+        for requirement in (
+            "Before EVERY non-wiki search",
+            "cached catalog above is NOT a completed lookup",
+            "pause other searches",
+            "Wiki discovery and wiki retrieval",
+        ):
+            if not assert_contains(label + ": search order", block, requirement):
+                failures += 1
+    if not assert_not_contains("delegation must not promise unrestricted grants",
+                               block_dev, "full read/write grants on every wiki"):
+        failures += 1
+
     # --- Test 4: librarian alias detection --------------------------------
     for alias in ("wiki_librarian", "WIKI_LIBRARIAN", "Librarian", "wiki-librarian"):
         ext3 = LLMWikiContext.__new__(LLMWikiContext)

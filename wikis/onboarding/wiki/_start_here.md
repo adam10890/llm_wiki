@@ -6,7 +6,31 @@ You are reading this because you need to **read from** or **write to** the Share
 
 A persistent, markdown-based knowledge base shared across agents. Each "wiki" is a folder of interlinked pages with `[[wikilinks]]` and YAML frontmatter. The vault is Obsidian-compatible — you can open it in Obsidian for graph view, backlinks, and full-text search.
 
-## The 5 core rules
+## Required before every other search
+
+Every agent or harness connected to SharedBrain must refresh task-relevant
+knowledge from the wiki BEFORE each non-wiki search, including web, repository,
+filesystem, database, connector and other-memory searches. This applies without
+the user mentioning the wiki. Do not perform the two searches in parallel.
+
+Read permitted onboarding instructions and query the relevant readable wikis;
+read the returned pages and their source dates, decisions and coverage. Keep a
+small task-local note of consulted pages, retrieval time and remaining gaps.
+Use other sources only to fill those gaps or perform required current-source
+verification. Do not assume a capped/truncated query searched the whole vault.
+A cached catalog or an answer from an earlier search is not a fresh lookup.
+
+Repeat before each subsequent non-wiki search. Wiki discovery and wiki retrieval
+do not require a recursive preflight. Delegate this lookup when the harness
+requires it, wait for its result, and preserve the requesting agent's grants.
+Each subordinate has the same search-order duty; delegation grants no extra access.
+Never include private wiki information in external search queries.
+
+If the wiki cannot be reached or permission is denied, report the blocker and
+pause other searches unless the user explicitly permits an exception. A
+successful lookup with no relevant content is a gap, not an outage.
+
+## The 5 content rules
 
 1. **Long-term memory only.** If a fact is useful only for the current session, write it to Pen & Paper, not the wiki.
 2. **Compile, do not paste.** When ingesting a source, restructure into the wiki's voice. Do not dump the raw document.

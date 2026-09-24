@@ -10,7 +10,19 @@ fans out across every wiki you have read access to, capped by
 (e.g., `commons::[[page]]`) so the user can see which wiki each claim
 came from.
 
-**When to use:** When the user asks a question that could be answered from
+**Mandatory search order:** Before EVERY non-wiki search, perform a fresh,
+task-relevant wiki lookup and read the results. This includes web, repository,
+filesystem, database, connector and other-memory searches, even when the user
+does not mention the wiki. Do not launch the other search in parallel. A cached
+catalog or previous answer is not a refresh. Follow the active profile's
+delegation policy; the librarian must preserve the requester's access scope.
+Use outside sources for remaining gaps or required freshness verification.
+If the wiki is unavailable or access is denied, report the blocker and pause
+other searches unless the user explicitly permits an exception. Wiki discovery
+and retrieval are exempt from recursive preflight. Never send private wiki
+content to external search services.
+
+**Also use:** When the user asks a question that could be answered from
 any wiki, or asks to "search the wiki", "look up", "find in wiki", "what does
 the wiki say about", "what do you know about X" — use this BEFORE answering
 from your training knowledge.

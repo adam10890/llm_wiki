@@ -27,6 +27,12 @@ tools, and a companion Claude Code plugin.
 
 ## Work Guidance
 
+- When connected to SharedBrain, refresh task-relevant wiki context before
+  EVERY other search, including code/file/web searches. Read the results before
+  proceeding; a cached catalog is not a refresh. Respect grants and pause on
+  unavailable/denied wiki access unless the user explicitly permits an exception.
+- Deployment and per-harness verification: `docs/WIKI_FIRST.md`.
+
 - Read the parent Agent Zero workspace contract before wiki work when this
   plugin is installed in a live Agent Zero tree.
 - For SharedBrain vault edits, follow the vault's own agents protocol rather
